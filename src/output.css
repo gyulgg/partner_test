@@ -902,9 +902,6 @@
   --tw-border-style: solid;
   border-style: solid;
 }
-.border-\[\#f3d5a3\] {
-  border-color: #f3d5a3;
-}
 .border-\[\#fbf0df\] {
   border-color: #fbf0df;
 }
@@ -913,9 +910,6 @@
 }
 .bg-\[\#242424\] {
   background-color: #242424;
-}
-.bg-\[\#f3d5a3\] {
-  background-color: #f3d5a3;
 }
 .bg-\[\#fbf0df\] {
   background-color: #fbf0df;
@@ -1912,6 +1906,23 @@
     }
   }
 }
+.hover\:scale-105 {
+  &:hover {
+    @media (hover: hover) {
+      --tw-scale-x: 105%;
+      --tw-scale-y: 105%;
+      --tw-scale-z: 105%;
+      scale: var(--tw-scale-x) var(--tw-scale-y);
+    }
+  }
+}
+.hover\:scale-\[1\.02\] {
+  &:hover {
+    @media (hover: hover) {
+      scale: 1.02;
+    }
+  }
+}
 .hover\:bg-\[\#f3d5a3\] {
   &:hover {
     @media (hover: hover) {
@@ -2081,6 +2092,19 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
   }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
 }
 @property --tw-translate-x {
   syntax: "*";
