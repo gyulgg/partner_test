@@ -21,38 +21,40 @@ export default function ResultPage() {
     .sort((a, b) => a.score - b.score);
 
   // Supabase 저장 useEffect
-  useEffect(() => {
-    const partner_id = new URLSearchParams(window.location.search).get("partner_id");
-    if (!partner_id) return console.warn("❗ partner_id 없음");
-  
-    const payload = {
-      partner_id,
-      q1_score: answers[0]?.score || 0,
-      q2_score: answers[1]?.score || 0,
-      q3_score: answers[2]?.score || 0,
-      q4_score: answers[3]?.score || 0,
-      q5_score: answers[4]?.score || 0,
-      total_score,
-    };
-  
-    fetch(`${process.env.REACT_APP_SUPABASE_URL}/rest/v1/partner_test_results`, {
-      method: "POST",
-      headers: {
-        apikey: process.env.REACT_APP_SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-      },
-      body: JSON.stringify(payload),
+  // ResultPage.jsx
+
+useEffect(() => {
+  const partner_id = localStorage.getItem("partner_id"); // 수정된 부분
+  if (!partner_id) return console.warn("❗ partner_id 없음");
+
+  const payload = {
+    partner_id,
+    q1_score: answers[0]?.score || 0,
+    q2_score: answers[1]?.score || 0,
+    q3_score: answers[2]?.score || 0,
+    q4_score: answers[3]?.score || 0,
+    q5_score: answers[4]?.score || 0,
+    total_score,
+  };
+
+  fetch(`${process.env.REACT_APP_SUPABASE_URL}/rest/v1/partner_test_results`, {
+    method: "POST",
+    headers: {
+      apikey: process.env.REACT_APP_SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      console.log("🛰️ status:", res.status);
+      return res.text();
     })
-      .then((res) => {
-        console.log("🔁 Supabase response:", res.status);
-        return res.text();
-      })
-      .then((text) => console.log("📨 Supabase response body:", text))
-      .catch((err) => console.error("❌ 저장 실패:", err));
-  }, [answers, total_score]);
-  
+    .then((text) => console.log("📨 Supabase response body:", text))
+    .catch((err) => console.error("❌ fetch error:", err));
+}, []);
+ 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-200 to-blue-500 p-6 text-white">
       <div className="max-w-4xl mx-auto space-y-12">
