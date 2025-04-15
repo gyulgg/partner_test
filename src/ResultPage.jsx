@@ -22,42 +22,37 @@ export default function ResultPage() {
 
   // Supabase 저장 useEffect
   useEffect(() => {
-    const saveToSupabase = async () => {
-      const partner_id = new URLSearchParams(window.location.search).get("partner_id");
-      if (!partner_id) return console.warn("❗ partner_id 없음");
-
-      const payload = {
-        partner_id,
-        q1_score: answers[0]?.score || 0,
-        q2_score: answers[1]?.score || 0,
-        q3_score: answers[2]?.score || 0,
-        q4_score: answers[3]?.score || 0,
-        q5_score: answers[4]?.score || 0,
-        total_score: totalScore,
-      };
-
-      try {
-        const res = await fetch("https://YOURPROJECT.supabase.co/rest/v1/partner_test_results", {
-          method: "POST",
-          headers: {
-            apikey: "YOUR_ANON_KEY",
-            Authorization: "Bearer YOUR_ANON_KEY",
-            "Content-Type": "application/json",
-            Prefer: "return=representation",
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (res.ok) console.log("저장 완료!");
-        else console.error("저장 실패:", await res.text());
-      } catch (err) {
-        console.error("오류 발생:", err);
-      }
+    const partner_id = new URLSearchParams(window.location.search).get("partner_id");
+    if (!partner_id) return console.warn("❗ partner_id 없음");
+  
+    const payload = {
+      partner_id,
+      q1_score: answers[0]?.score || 0,
+      q2_score: answers[1]?.score || 0,
+      q3_score: answers[2]?.score || 0,
+      q4_score: answers[3]?.score || 0,
+      q5_score: answers[4]?.score || 0,
+      total_score,
     };
-
-    saveToSupabase();
-  }, [answers, totalScore]);
-
+  
+    fetch(`${process.env.REACT_APP_SUPABASE_URL}/rest/v1/partner_test_results`, {
+      method: "POST",
+      headers: {
+        apikey: process.env.REACT_APP_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        console.log("🔁 Supabase response:", res.status);
+        return res.text();
+      })
+      .then((text) => console.log("📨 Supabase response body:", text))
+      .catch((err) => console.error("❌ 저장 실패:", err));
+  }, [answers, total_score]);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-200 to-blue-500 p-6 text-white">
       <div className="max-w-4xl mx-auto space-y-12">
