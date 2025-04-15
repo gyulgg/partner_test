@@ -1,53 +1,5 @@
-// import { useLocation } from "react-router-dom";
-// import { questions, feedbackTemplate, summaryFeedback } from "./PartnerSuccessTest";
-
-// export default function ResultPage() {
-//   const location = useLocation();
-//   const answers = location.state?.answers || [];
-
-//   const totalScore = answers.reduce((sum, ans) => sum + ans.score, 0);
-
-//   const gradeInfo = summaryFeedback.find(
-//     (item) => totalScore >= item.minScore && totalScore <= item.maxScore
-//   );
-
-//   const scoredFeedback = answers
-//     .map((ans) => {
-//       const feedback = feedbackTemplate[ans.questionId]?.[ans.score];
-//       const question = questions.find((q) => q.id === ans.questionId)?.title || "";
-//       return { questionId: ans.questionId, score: ans.score, feedback, question };
-//     })
-//     .sort((a, b) => a.score - b.score); // 낮은 점수 먼저 정렬
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-100 text-gray-800 p-8">
-//       <div className="max-w-3xl mx-auto space-y-8">
-//         <div className="text-center">
-//           <h1 className="text-3xl font-bold text-blue-700">성사율 진단 결과</h1>
-//           <p className="text-lg mt-2">
-//             총점: <span className="font-bold text-blue-600">{totalScore}</span> / 25점
-//           </p>
-//           <p className="mt-1 text-xl font-semibold text-blue-800">
-//             {gradeInfo?.grade || "등급 없음"}
-//           </p>
-//           <p className="mt-1 text-gray-600">{gradeInfo?.message}</p>
-//         </div>
-
-//         <div className="space-y-6">
-//           {scoredFeedback.map((item, idx) => (
-//             <div key={idx} className="bg-white shadow-md rounded-xl p-4">
-//               <h3 className="font-semibold text-blue-600">{item.question}</h3>
-//               <p className="mt-1 text-gray-700">{item.feedback}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 import { useLocation } from "react-router-dom";
+import { useEffect } from "react"; // 추가
 import { questions, feedbackTemplate, summaryFeedback } from "./PartnerSuccessTest";
 
 export default function ResultPage() {
@@ -55,6 +7,7 @@ export default function ResultPage() {
   const answers = location.state?.answers || [];
 
   const totalScore = answers.reduce((sum, ans) => sum + ans.score, 0);
+
   const gradeInfo = summaryFeedback.find(
     (item) => totalScore >= item.minScore && totalScore <= item.maxScore
   );
@@ -66,7 +19,44 @@ export default function ResultPage() {
       return { questionId: ans.questionId, score: ans.score, feedback, question };
     })
     .sort((a, b) => a.score - b.score);
-    
+
+  // Supabase 저장 useEffect
+  useEffect(() => {
+    const saveToSupabase = async () => {
+      const partner_id = new URLSearchParams(window.location.search).get("partner_id");
+      if (!partner_id) return console.warn("❗ partner_id 없음");
+
+      const payload = {
+        partner_id,
+        q1_score: answers[0]?.score || 0,
+        q2_score: answers[1]?.score || 0,
+        q3_score: answers[2]?.score || 0,
+        q4_score: answers[3]?.score || 0,
+        q5_score: answers[4]?.score || 0,
+        total_score: totalScore,
+      };
+
+      try {
+        const res = await fetch("https://YOURPROJECT.supabase.co/rest/v1/partner_test_results", {
+          method: "POST",
+          headers: {
+            apikey: "YOUR_ANON_KEY",
+            Authorization: "Bearer YOUR_ANON_KEY",
+            "Content-Type": "application/json",
+            Prefer: "return=representation",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) console.log("저장 완료!");
+        else console.error("저장 실패:", await res.text());
+      } catch (err) {
+        console.error("오류 발생:", err);
+      }
+    };
+
+    saveToSupabase();
+  }, [answers, totalScore]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-200 to-blue-500 p-6 text-white">
